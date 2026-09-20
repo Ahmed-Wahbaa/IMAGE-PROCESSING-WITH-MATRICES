@@ -275,15 +275,16 @@ Image adjustContrast(const Image& input, float factor) {
 
 
 /**
- * Applies a simple blur filter
+ * Applies a Gaussian blur filter with appropriate edge padding.
  *
  * Steps:
- * 1. Create a new image with the same dimensions as the input
- * 2. For each pixel (excluding borders):
- *    - For each color channel:
- *        - Calculate the average of the 3x3 neighborhood
- *        - Set the output pixel to this average value
- * 3. Return the blurred image
+ * 1. Create a new image with the same dimensions and channels.
+ * 2. Define a standard 3x3 Gaussian kernel.
+ * 3. For each pixel and each color channel:
+ *    - Apply clamp-to-edge padding for out-of-bounds neighbors.
+ *    - Multiply neighbor values by the corresponding Gaussian kernel weights.
+ *    - Sum the weighted values and divide by the kernel sum (16).
+ * 4. Return the blurred image.
  */
 Image applyBlur(const Image& input) {
     int height = input.getHeight();
@@ -291,12 +292,42 @@ Image applyBlur(const Image& input) {
     int channels = input.getChannels();
     Image output(width, height, channels);
 
-    // TODO: Implement this function
-    // For each pixel (from y=1 to height-2, x=1 to width-2) and each channel:
-    //   sum = 0
-    //   For each neighbor (ky from -1 to 1, kx from -1 to 1):
-    //     sum += input(y+ky, x+kx, c)
-    //   output(y, x, c) = sum / 9
+    // 3x3 Gaussian kernel approximation
+    int kernel[3][3] = {
+        {1, 2, 1},
+        {2, 4, 2},
+        {1, 2, 1}
+    };
+    const int kernel_sum = 16;
+
+    // Process all pixels, including borders, using appropriate padding
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            for (int c = 0; c < channels; ++c) {
+                int sum = 0;
+                
+                for (int ky = -1; ky <= 1; ++ky) {
+                    for (int kx = -1; kx <= 1; ++kx) {
+                        // Appropriate padding: clamp coordinates to image boundaries
+                        int ny = y + ky;
+                        int nx = x + kx;
+                        
+                        if (ny < 0) ny = 0;
+                        else if (ny >= height) ny = height - 1;
+                        
+                        if (nx < 0) nx = 0;
+                        else if (nx >= width) nx = width - 1;
+                        
+                        // Accumulate weighted neighbor values
+                        sum += input(ny, nx, c) * kernel[ky + 1][kx + 1];
+                    }
+                }
+                
+                // Integer division yields the final smoothed pixel value
+                output(y, x, c) = sum / kernel_sum;
+            }
+        }
+    }
 
     return output;
 }
