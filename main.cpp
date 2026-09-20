@@ -311,15 +311,21 @@ Image rotate90(const Image& input) {
     int height = input.getHeight();
     int width = input.getWidth();
     int channels = input.getChannels();
-    Image output(height, width, channels); // Width and height are swapped
 
-    // TODO: Implement this function
-    // For each pixel and each channel:
-    //   output(x, height-1-y, c) = input(y, x, c)
+    // Swap dimensions for 90-degree clockwise rotation
+    Image output(height, width, channels);
+
+    // Copy each pixel to its rotated position
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            for (int c = 0; c < channels; c++) {
+                output(x, height - 1 - y, c) = input(y, x, c);
+            }
+        }
+    }
 
     return output;
 }
-
 // Creates a simple 4x4 test image with a pattern
 void createTestImage(const string& filename) {
     Image img(4, 4);
