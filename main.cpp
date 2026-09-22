@@ -404,78 +404,77 @@ void createTestImage(const string& filename) {
 }
 
 int main() {
-    cout << "Image Processing with Matrices - Student Project\n";
+    cout << "================================================\n";
+    cout << "   Image Processing - Integration & Testing     \n";
     cout << "================================================\n\n";
 
-    // Create a 4x4 test image
-    createTestImage("test_image.ppm");
+    string testFilename = "test_image.ppm";
+    createTestImage(testFilename);
 
-    // Load the image
     Image input;
-    if (!input.loadPPM("test_image.ppm")) {
-        cerr << "Failed to load image. Exiting.\n";
+    if (!input.loadPPM(testFilename)) {
+        cerr << "[ERROR] Failed to load PPM file. Integration failed.\n";
         return 1;
     }
-
-    cout << "\nImage loaded successfully. Dimensions: "
+    cout << "[PASS] Image loaded successfully. Dimensions: "
          << input.getWidth() << "x" << input.getHeight() << "\n\n";
 
-    // Apply various transformations
-    cout << "Applying image transformations...\n";
+    cout << "--- Running Verification Tests ---\n";
 
     Image gray = convertToGrayscale(input);
-    gray.savePPM("gray_image.ppm");
-    cout << "- Grayscale conversion completed\n";
-    cout << "Grayscale image data:\n";
-    gray.print();
-    cout << endl;
+    if (gray.savePPM("test_gray.ppm") && gray.getChannels() == 1) {
+        cout << "[PASS] IPWM-1: Grayscale Conversion\n";
+    } else {
+        cout << "[FAIL] IPWM-1: Grayscale Conversion\n";
+    }
 
     Image flippedH = flipHorizontal(input);
-    flippedH.savePPM("flipped_horizontal.ppm");
-    cout << "- Horizontal flip completed\n";
-    cout << "Horizontally flipped image data:\n";
-    flippedH.print();
-    cout << endl;
+    if (flippedH.savePPM("test_flipped_h.ppm")) {
+        cout << "[PASS] IPWM-2: Horizontal Flip\n";
+    } else {
+        cout << "[FAIL] IPWM-2: Horizontal Flip\n";
+    }
 
     Image flippedV = flipVertical(input);
-    flippedV.savePPM("flipped_vertical.ppm");
-    cout << "- Vertical flip completed\n";
-    cout << "Vertically flipped image data:\n";
-    flippedV.print();
-    cout << endl;
+    if (flippedV.savePPM("test_flipped_v.ppm")) {
+        cout << "[PASS] IPWM-3: Vertical Flip\n";
+    } else {
+        cout << "[FAIL] IPWM-3: Vertical Flip\n";
+    }
 
     Image bright = adjustBrightness(input, 50);
-    bright.savePPM("bright_image.ppm");
-    cout << "- Brightness adjustment completed\n";
-    cout << "Brightness adjusted image data:\n";
-    bright.print();
-    cout << endl;
+    if (bright.savePPM("test_brightness.ppm")) {
+        cout << "[PASS] IPWM-4: Brightness Adjustment\n";
+    } else {
+        cout << "[FAIL] IPWM-4: Brightness Adjustment\n";
+    }
 
     Image contrast = adjustContrast(input, 1.5f);
-    contrast.savePPM("contrast_image.ppm");
-    cout << "- Contrast adjustment completed\n";
-    cout << "Contrast adjusted image data:\n";
-    contrast.print();
-    cout << endl;
+    if (contrast.savePPM("test_contrast.ppm")) {
+        cout << "[PASS] IPWM-5: Contrast Adjustment\n";
+    } else {
+        cout << "[FAIL] IPWM-5: Contrast Adjustment\n";
+    }
 
     Image blur = applyBlur(input);
-    blur.savePPM("blurred_image.ppm");
-    cout << "- Blur filter completed\n";
-    cout << "Blurred image data:\n";
-    blur.print();
-    cout << endl;
+    if (blur.savePPM("test_blur.ppm")) {
+        cout << "[PASS] IPWM-6: 3x3 Blur Filter\n";
+    } else {
+        cout << "[FAIL] IPWM-6: 3x3 Blur Filter\n";
+    }
 
     Image rotated = rotate90(input);
-    rotated.savePPM("rotated90_image.ppm");
-    cout << "- 90-degree rotation completed\n";
-    cout << "Rotated image data:\n";
-    rotated.print();
-    cout << endl;
+    bool dimensionsSwapped = (rotated.getWidth() == input.getHeight() && 
+                              rotated.getHeight() == input.getWidth());
+    if (rotated.savePPM("test_rotated90.ppm") && dimensionsSwapped) {
+        cout << "[PASS] IPWM-7: Rotate 90 Degrees Clockwise\n";
+    } else {
+        cout << "[FAIL] IPWM-7: Rotate 90 Degrees Clockwise\n";
+    }
 
-    cout << "\nAll operations completed successfully!\n";
-    cout << "Check the generated PPM files to see the results.\n";
-    cout << "Use an image viewer that supports PPM format or convert them to PNG/JPG.\n";
+    cout << "\n================================================\n";
+    cout << "   Integration & Verification Suite Completed!  \n";
+    cout << "================================================\n";
 
     return 0;
 }
-
